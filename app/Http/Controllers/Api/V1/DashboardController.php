@@ -26,24 +26,20 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        // Cache dashboard stats for 5 minutes for mobile performance
-        $cacheKey = 'mobile_dashboard_' . auth()->id();
-        
-        $data = cache()->remember($cacheKey, 300, function() use ($request) {
-            $type = $request->input('type', 'overview');
+        // No caching - always fetch fresh data for mobile app
+        $type = $request->input('type', 'overview');
 
-            return match($type) {
-                'overview' => $this->getOverview(),
-                'revenue' => $this->getRevenueStats(),
-                'leads' => $this->getTotalLeadsStats(),
-                'revenue-by-sources' => $this->getLeadsStatsBySources(),
-                'revenue-by-types' => $this->getLeadsStatsByTypes(),
-                'top-products' => $this->getTopSellingProducts(),
-                'top-persons' => $this->getTopPersons(),
-                'open-leads-by-states' => $this->getOpenLeadsByStates(),
-                default => $this->getOverview(),
-            };
-        });
+        $data = match($type) {
+            'overview' => $this->getOverview(),
+            'revenue' => $this->getRevenueStats(),
+            'leads' => $this->getTotalLeadsStats(),
+            'revenue-by-sources' => $this->getLeadsStatsBySources(),
+            'revenue-by-types' => $this->getLeadsStatsByTypes(),
+            'top-products' => $this->getTopSellingProducts(),
+            'top-persons' => $this->getTopPersons(),
+            'open-leads-by-states' => $this->getOpenLeadsByStates(),
+            default => $this->getOverview(),
+        };
 
         return response()->json([
             'success' => true,
