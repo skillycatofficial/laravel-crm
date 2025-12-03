@@ -97,18 +97,17 @@ class LeadController extends Controller
      */
     public function show($id)
     {
-        $lead = $this->leadRepository->with([
+        // Use direct Eloquent to avoid pivot table issues
+        $lead = \Webkul\Lead\Models\Lead::with([
             'user',
             'person.organization',
             'source',
             'type',
             'pipeline',
             'stage',
-            'tags',
-            'products',
-            'activities',
-            'quotes',
-        ])->find($id);
+        ])
+        ->withCount(['products', 'activities', 'quotes'])
+        ->find($id);
 
         if (! $lead) {
             return response()->json([

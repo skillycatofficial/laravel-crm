@@ -103,14 +103,14 @@ class PersonController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'emails' => 'nullable|array',
-            'emails.*' => 'email',
             'contact_numbers' => 'nullable|array',
             'job_title' => 'nullable|string|max:255',
             'organization_id' => 'nullable|exists:organizations,id',
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $person = $this->personRepository->create($validated);
+        // Use direct model creation to avoid custom attribute issues for mobile API
+        $person = \Webkul\Contact\Models\Person::create($validated);
 
         return response()->json([
             'success' => true,

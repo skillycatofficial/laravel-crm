@@ -28,6 +28,7 @@ Route::prefix('v1')->group(function () {
     // Public Routes (No Authentication Required)
     // ==========================================
     Route::post('/login', [AuthController::class, 'login'])->name('api.v1.auth.login');
+    Route::post('/device/connect', [App\Http\Controllers\Api\V1\DeviceConnectionController::class, 'connectDevice'])->name('api.v1.device.connect');
 
     // ==========================================
     // Protected Routes (Authentication Required)
@@ -44,6 +45,9 @@ Route::prefix('v1')->group(function () {
             Route::put('/profile', [AuthController::class, 'updateProfile'])->name('api.v1.auth.update_profile');
             Route::post('/refresh-token', [AuthController::class, 'refreshToken'])->name('api.v1.auth.refresh_token');
         });
+
+        // Device Connection (QR Code)
+        Route::post('/device/qr-code', [App\Http\Controllers\Api\V1\DeviceConnectionController::class, 'generateQRCode'])->name('api.v1.device.qr');
 
         // ==========================================
         // Dashboard Routes

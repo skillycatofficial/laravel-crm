@@ -36,6 +36,14 @@ Route::prefix('settings')->group(function () {
     });
 
     /**
+     * Connect Device (QR Code) Routes.
+     */
+    Route::controller(App\Http\Controllers\Admin\DeviceConnectionController::class)->prefix('connect-device')->group(function () {
+        Route::get('', 'index')->name('admin.settings.connect_device');
+        Route::post('generate-qr', 'generateQrCode')->name('admin.settings.connect_device.generate_qr');
+    });
+
+    /**
      * Groups routes.
      */
     Route::controller(GroupController::class)->prefix('groups')->group(function () {

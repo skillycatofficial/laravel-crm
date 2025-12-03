@@ -105,6 +105,7 @@ class QuoteController extends Controller
             'description' => 'nullable|string',
             'user_id' => 'required|exists:users,id',
             'person_id' => 'required|exists:persons,id',
+            'lead_id' => 'nullable|exists:leads,id',
             'billing_address' => 'nullable|array',
             'shipping_address' => 'nullable|array',
             'discount_percent' => 'nullable|numeric|min:0|max:100',
@@ -126,9 +127,11 @@ class QuoteController extends Controller
         ]);
 
         $items = $validated['items'] ?? [];
-        unset($validated['items']);
+        $leadId = $validated['lead_id'] ?? null;
+        unset($validated['items'], $validated['lead_id']);
 
-        $quote = $this->quoteRepository->create($validated);
+        // Use direct model creation to avoid custom attribute issues for mobile API
+        $quote = \Webkul\Quote\Models\Quote::create($validated);
 
         // Create quote items
         if (!empty($items)) {
@@ -137,10 +140,18 @@ class QuoteController extends Controller
             }
         }
 
+        // Link quote to lead if provided
+        if ($leadId) {
+            $quote->leads()->attach($leadId);
+        }
+
+        $quote->refresh();
+        $quote->load(['user', 'person', 'items']);
+
         return response()->json([
             'success' => true,
             'message' => 'Quote created successfully',
-            'data' => new QuoteResource($quote->load(['user', 'person', 'items'])),
+            'data' => new QuoteResource($quote),
         ], 201);
     }
 
