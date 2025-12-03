@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 
@@ -41,27 +41,35 @@ class DeviceConnectionController extends Controller
         $token = Str::random(60);
         $expiry = now()->addMinutes(5);
 
-        // Store token with user ID and expiry
-        Cache::put('device_connection_token_' . $token, [
+        // Get base URL without /api/v1
+        $baseUrl = rtrim(url('/'), '/');
+
+        // Store token with user ID and expiry (matching API controller format)
+        Cache::put('qr_connection:' . $token, [
             'user_id' => $user->id,
             'expires_at' => $expiry->timestamp,
-            'api_url' => url('/api/v1'),
+            'api_url' => $baseUrl, // Store base URL only
         ], $expiry);
 
         $qrData = json_encode([
             'type' => 'crm_device_connection',
             'token' => $token,
-            'api_url' => url('/api/v1'),
+            'api_url' => $baseUrl, // Base URL without /api/v1
         ]);
 
-        // Generate QR code using BaconQrCode (simple and reliable)
-        $renderer = new ImageRenderer(
-            new RendererStyle(300),
-            new SvgImageBackEnd()
-        );
-        
-        $writer = new Writer($renderer);
-        $qrCodeSvg = $writer->writeString($qrData);
+        try {
+            // Try BaconQrCode v3 approach (with Renderer)
+            $renderer = new ImageRenderer(
+                new RendererStyle(300),
+                new SvgImageBackEnd()
+            );
+            $writer = new Writer($renderer);
+            $qrCodeSvg = $writer->writeString($qrData);
+        } catch (\Exception $e) {
+            // Fallback for older BaconQrCode versions
+            $writer = new Writer(new SvgImageBackEnd());
+            $qrCodeSvg = $writer->writeString($qrData);
+        }
         
         // Convert SVG to data URI
         $qrCodeDataUri = 'data:image/svg+xml;base64,' . base64_encode($qrCodeSvg);

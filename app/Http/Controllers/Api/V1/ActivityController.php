@@ -35,7 +35,8 @@ class ActivityController extends Controller
         $personId = $request->input('person_id');
         $upcoming = $request->input('upcoming'); // Get upcoming activities
 
-        $query = $this->activityRepository->with(['user', 'participants', 'leads', 'persons']);
+        // Use withCount for many-to-many relationships to avoid pivot table issues
+        $query = $this->activityRepository->with(['user'])->withCount(['leads', 'persons']);
 
         // Apply filters
         if ($type) {
@@ -99,9 +100,7 @@ class ActivityController extends Controller
             'participants.user',
             'participants.person',
             'files',
-            'leads',
-            'persons',
-        ])->find($id);
+        ])->withCount(['leads', 'persons'])->find($id);
 
         if (! $activity) {
             return response()->json([

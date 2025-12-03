@@ -283,6 +283,13 @@ return [
         'route'      => 'admin.settings.tags.index',
         'sort'       => 1,
         'icon-class' => 'icon-settings-tag',
+    ], [
+        'key'        => 'settings.other_settings.connect_device',
+        'name'       => 'Connect Device',
+        'info'       => 'Connect mobile devices using QR code',
+        'route'      => 'admin.settings.connect_device',
+        'sort'       => 2,
+        'icon-class' => 'icon-mobile',
     ],
 
     /**

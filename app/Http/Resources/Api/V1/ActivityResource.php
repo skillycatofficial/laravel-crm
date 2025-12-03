@@ -66,7 +66,11 @@ class ActivityResource extends JsonResource
                 });
             }),
             
-            // Related entities
+            // Related entities (counts to avoid pivot table issues)
+            'leads_count' => $this->leads_count ?? 0,
+            'persons_count' => $this->persons_count ?? 0,
+            
+            // Full relationships (only when explicitly loaded)
             'leads' => $this->whenLoaded('leads', function() {
                 return $this->leads->map(function($lead) {
                     return [
