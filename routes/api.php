@@ -107,6 +107,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/', [QuoteController::class, 'index'])->name('api.v1.quotes.index');
             Route::post('/', [QuoteController::class, 'store'])->name('api.v1.quotes.store');
             Route::get('/{id}', [QuoteController::class, 'show'])->name('api.v1.quotes.show');
+            Route::get('/{id}/download', [QuoteController::class, 'downloadPDF'])->name('api.v1.quotes.download');
             Route::put('/{id}', [QuoteController::class, 'update'])->name('api.v1.quotes.update');
             Route::delete('/{id}', [QuoteController::class, 'destroy'])->name('api.v1.quotes.destroy');
         });

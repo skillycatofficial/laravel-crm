@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\QuoteResource;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Response as ResponseFacade;
 use Webkul\Quote\Repositories\QuoteRepository;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class QuoteController extends Controller
 {
@@ -244,6 +247,30 @@ class QuoteController extends Controller
             'success' => true,
             'message' => 'Quote deleted successfully',
         ], 200);
+    }
+
+    /**
+     * Download quote as PDF.
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function downloadPDF($id)
+    {
+        $quote = $this->quoteRepository->with(['user', 'person.organization', 'items'])->find($id);
+
+        if (! $quote) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Quote not found',
+            ], 404);
+        }
+
+        $pdf = Pdf::loadView('admin::quotes.pdf', compact('quote'));
+        
+        $filename = 'Quote_' . $quote->id . '_' . $quote->created_at->format('d-m-Y') . '.pdf';
+
+        return $pdf->download($filename);
     }
 }
 
